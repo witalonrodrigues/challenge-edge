@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "author": "Witalon Rodrigues",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-breadboard-half", "id": "bb1", "top": -156.6, "left": -112.4, "attrs": {} },
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 86.4, "left": -4.76, "attrs": {} },
+    { "type": "chip-rfid-rc522", "id": "chip1", "top": 68.22, "left": 187.2, "attrs": {} },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": -70.8,
+      "left": -82.6,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led2",
+      "top": -70.8,
+      "left": -53.8,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 4.8,
+      "left": -96.55,
+      "rotate": 90,
+      "attrs": { "value": "200" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 4.8,
+      "left": -67.75,
+      "rotate": 90,
+      "attrs": { "value": "200" }
+    },
+    { "type": "wokwi-servo", "id": "servo1", "top": -232.4, "left": 307.2, "attrs": {} }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "esp:GND.1", "bb1:bn.1", "black", [ "h0" ] ],
+    [ "bb1:7b.h", "esp:12", "green", [ "v0" ] ],
+    [ "led1:A", "esp:14", "red", [ "v0" ] ],
+    [ "esp:5V", "bb1:bp.6", "blue", [ "h0" ] ],
+    [ "chip1:VCC", "bb1:bp.20", "blue", [ "h0" ] ],
+    [ "chip1:GND", "bb1:bn.21", "black", [ "h0" ] ],
+    [ "chip1:SDA", "esp:23", "white", [ "h-67.2", "v38.4" ] ],
+    [ "chip1:SCK", "esp:22", "gold", [ "h-48", "v57.6" ] ],
+    [ "esp:21", "chip1:MOSI", "orange", [ "h76.8", "v-67.2", "h-9.6" ] ],
+    [ "esp:19", "chip1:MISO", "#8f4814", [ "h86.4", "v-76.8" ] ],
+    [ "chip1:RST", "esp:18", "gray", [ "h-28.8", "v76.8", "h-19.2" ] ],
+    [ "servo1:GND", "bb1:bn.25", "black", [ "h-67.2", "v220.8" ] ],
+    [ "servo1:V+", "bb1:bp.25", "green", [ "h-86.4", "v192.1" ] ],
+    [ "esp:17", "servo1:PWM", "yellow", [ "h268.8", "v-345.6", "h-76.8", "v-28.8" ] ],
+    [ "led1:A", "bb1:4b.g", "", [ "$bb" ] ],
+    [ "led1:C", "bb1:3b.g", "", [ "$bb" ] ],
+    [ "led2:A", "bb1:7b.g", "", [ "$bb" ] ],
+    [ "led2:C", "bb1:6b.g", "", [ "$bb" ] ],
+    [ "r1:1", "bb1:3b.h", "", [ "$bb" ] ],
+    [ "r1:2", "bb1:bn.2", "", [ "$bb" ] ],
+    [ "r2:1", "bb1:6b.h", "", [ "$bb" ] ],
+    [ "r2:2", "bb1:bn.5", "", [ "$bb" ] ]
+  ],
+  "dependencies": {}
+}
