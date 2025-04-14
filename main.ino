@@ -35,7 +35,7 @@ void connectToMQTT() {
   while (!client.connected()) {
     Serial.print("Conectando ao MQTT...");
     if (client.connect("ESP32Client")) {
-      Serial.println("Conectado ao MQTT!");
+      Serial.println("Conectado com sucesso ao MQTT!!");
     } else {
       Serial.print("Falha na conexão.");
       Serial.print(client.state());
@@ -91,7 +91,7 @@ void setup() {
   }
   Serial.println("Wi-Fi conectado!");
 
-  // Conectar ao MQTT
+  // conectar no MQTT
   client.setServer(mqttServer, mqttPort);
   connectToMQTT();
 
@@ -135,7 +135,7 @@ void loop() {
 
       for (int i = 0; i < 100; i++) {
         if (ids[i] == rfidTag) {
-          ids[i] = "";  // Limpa o ID da lista
+          ids[i] = ""; 
           break;
         }
       }
