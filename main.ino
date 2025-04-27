@@ -1,8 +1,10 @@
 #include <MFRC522.h>
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
 #include <PubSubClient.h>
 #include <ESP32Servo.h>
+#include <certificates.h>
 
 #define ledR 14
 #define ledG 12
@@ -12,6 +14,10 @@ Servo myServo;
 
 String ids[100]; 
 
+
+// AWS
+const char* endpoint = "avmr86pgqcbi1-ats.iot.us-east-2.amazonaws.com";
+const char* awsTopic = "sabara/entradas";
 
 // configurações para conectar no wifi
 const char* ssid = "nome_wifi";  
@@ -27,18 +33,53 @@ const char* mqttServer = "broker.hivemq.com";
 const int mqttPort = 1883;
 const char* mqttTopic = "sabara/entradas";
 
-WiFiClient espClient;
-PubSubClient client(espClient);
+WiFiClient espClient; // para mqtt
+PubSubClient mqttClient(espClient);
+
+WiFiClientSecure net;  // para AWS
+PubSubClient awsClient(net);
+
+void conectarWifi(){
+  WiFi.begin("Wokwi-GUEST", "", 6);
+  Serial.print("Conectando ao Wi-Fi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.print(".");
+  }
+  Serial.println("Wi-Fi conectado!");
+}
 
 // função para conectar ao MQTT
-void connectToMQTT() {
-  while (!client.connected()) {
+void connectarMQTT() {
+  mqttClient.setServer(mqttServer, mqttPort);
+  while (!mqttClient.connected()) {
     Serial.print("Conectando ao MQTT...");
-    if (client.connect("ESP32Client")) {
-      Serial.println("Conectado com sucesso ao MQTT!!");
+    if (mqttClient.connect("ESP32Client-1")) {
+      Serial.println("Conectado ao MQTT!");
     } else {
       Serial.print("Falha na conexão.");
-      Serial.print(client.state());
+      Serial.print(mqttClient.state());
+      delay(2000);
+    }
+  }
+}
+
+void conectarAWS(){
+ // credenciais aws
+  net.setCACert(aws_cert_ca);
+  net.setCertificate(aws_cert_crt);
+  net.setPrivateKey(aws_cert_private);
+
+  awsClient.setServer(endpoint, 8883);
+ 
+ 
+  Serial.println("Conectando ao AWS IOT");
+ 
+  while (!awsClient.connected()) {
+    Serial.print("...");
+    if (awsClient.connect("ESP32ClientAWS")) {
+      Serial.println("Conectado ao AWS IOT!");
+    } else {
       delay(2000);
     }
   }
@@ -82,18 +123,9 @@ void setup() {
 
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer, "time.nist.gov", "pool.ntp.org");
 
-  // conectar no wifi
-  WiFi.begin("Wokwi-GUEST", "", 6);
-  Serial.print("Conectando ao Wi-Fi");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.print(".");
-  }
-  Serial.println("Wi-Fi conectado!");
-
-  // conectar no MQTT
-  client.setServer(mqttServer, mqttPort);
-  connectToMQTT();
+  conectarWifi();
+  connectarMQTT();
+  conectarAWS();
 
   Serial.println("Aproxime um cartão RFID ou digite um ID no Serial: ");
 }
@@ -135,7 +167,7 @@ void loop() {
 
       for (int i = 0; i < 100; i++) {
         if (ids[i] == rfidTag) {
-          ids[i] = ""; 
+          ids[i] = "";  // Limpa o ID da lista
           break;
         }
       }
@@ -152,17 +184,29 @@ void loop() {
     String jsonString;
     serializeJson(json, jsonString);
 
-    if (!client.connected()) {
-      connectToMQTT();
+    if (!mqttClient.connected()) {
+      connectarMQTT();
     }
-    client.loop();
+    mqttClient.loop();
+
+    if (!awsClient.connected()) {
+      conectarAWS();
+    }
+    awsClient.loop();
     
-    if (client.publish(mqttTopic, jsonString.c_str())) {
-    Serial.println("Dados publicados com sucesso!");
-  } else {
-    Serial.println("Falha ao publicar os dados.");
-  }
+    if (mqttClient.publish(mqttTopic, jsonString.c_str())) {
+      Serial.println("Dados publicados com sucesso no MQTT!");
+    } else {
+      Serial.println("Falha ao publicar os dados no MQTT.");
+    }
+
+    if (awsClient.publish(awsTopic, jsonString.c_str())) {
+      Serial.println("Dados publicados com sucesso na AWS!");
+    } else {
+      Serial.println("Falha ao publicar os dados na AWS.");
+    }
 
   }  
   delay(500); 
 }
+
