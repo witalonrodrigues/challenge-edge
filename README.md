@@ -110,22 +110,24 @@ AWS IOT
 - Porta: 8883
 
 - Uso de bibliotecas seguras (ex: WiFiClientSecure)
+
+É necessário inserir credencias AWS no arquivo certificates.h conforme abaixo:
 ```
 const char* aws_cert_ca = R"EOF(
 -----BEGIN CERTIFICATE-----
-// INSERIR CHAVE AWS
+// INSERIR CERTIFICATE CA
 -----END CERTIFICATE-----
 )EOF";
 
 const char* aws_cert_crt = R"KEY(
 -----BEGIN CERTIFICATE-----
-// INSERIR CHAVE AWS
+// INSERIR CERTIFICATE CRT
 -----END CERTIFICATE-----
 )KEY";
 
 const char* aws_cert_private = R"KEY(
 -----BEGIN RSA PRIVATE KEY-----
-// INSERIR CHAVE AWS
+// INSERIR CERTIFICATE PRIVATE
 -----END RSA PRIVATE KEY-----
 )KEY";
 ```
