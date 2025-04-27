@@ -152,8 +152,8 @@ As mensagens devem aparecer automaticamente a cada registro de entrada ou saída
 
 ## Autores
 
-Lucas Alves Piereti - RM559533
-Rafaela Heer Robinson - RM560249
-Julia Hadja Kfouri Nunes - RM559410
-Witalon Antonio Rodrigues - RM559023
+- Lucas Alves Piereti - RM559533
+- Rafaela Heer Robinson - RM560249
+- Julia Hadja Kfouri Nunes - RM559410
+- Witalon Antonio Rodrigues - RM559023
 
