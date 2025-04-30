@@ -151,6 +151,8 @@ Port: 1883
 As mensagens devem aparecer automaticamente a cada registro de entrada ou saída.
 
 ## WOKWI
+Link da simulação no Wokwi:
+
 https://wokwi.com/projects/426945753890067457
 
 ## Autores
