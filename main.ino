@@ -130,18 +130,38 @@ void setup() {
   Serial.println("Aproxime um cartão RFID ou digite um ID no Serial: ");
 }
 
-void loop() {
-  // código para simular entrada de um cartão/pulseira através da Serial
-  if (Serial.available() > 0) {
-    String rfidTag = Serial.readStringUntil('\n'); 
-    rfidTag.trim();  // remover espaços
 
-    Serial.print("Tag RFID detectada: ");
+void loop() {
+  String rfidTag = "";
+
+  // Leitura via cartão RFID real
+  if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
+    for (byte i = 0; i < rfid.uid.size; i++) {
+      if (rfid.uid.uidByte[i] < 0x10) rfidTag += "0";
+      rfidTag += String(rfid.uid.uidByte[i], HEX);
+    }
+    rfidTag.toUpperCase();
+
+    Serial.print("Cartão RFID lido: ");
     Serial.println(rfidTag);
 
+    rfid.PICC_HaltA();         // Finaliza comunicação com o cartão
+    rfid.PCD_StopCrypto1();    // Finaliza criptografia
+  }
+
+  // Leitura via Serial
+  if (Serial.available() > 0) {
+    rfidTag = Serial.readStringUntil('\n'); 
+    rfidTag.trim();  // remover espaços
+
+    Serial.print("Tag RFID digitada: ");
+    Serial.println(rfidTag);
+  }
+
+  // Se rfidTag não estiver vazia, processa os dados
+  if (rfidTag != "") {
     dateTime = getDateTime();  // atualizar data e hora
 
-    // verificar se o paciente está dentro ou não
     String message = "";
     if (!esta_dentro(rfidTag)) {
       Serial.println("Entrada registrada.");
@@ -151,11 +171,11 @@ void loop() {
       message = "Entrada: " + rfidTag + " em " + dateTime;
       Serial.println(message);
 
-        for (int i = 0; i < 100; i++) {
-          if (ids[i] == "") {  
-            ids[i] = rfidTag;
-            break;
-          }
+      for (int i = 0; i < 100; i++) {
+        if (ids[i] == "") {  
+          ids[i] = rfidTag;
+          break;
+        }
       }
     } else {
       Serial.println("Saída registrada.");
@@ -171,16 +191,13 @@ void loop() {
           break;
         }
       }
-
     }
 
-    
     StaticJsonDocument<200> json;
     json["ID"] = rfidTag;
     json["Hora"] = dateTime;
     json["status"] = esta_dentro(rfidTag) ? "Entrada" : "Saída";
 
-    
     String jsonString;
     serializeJson(json, jsonString);
 
@@ -205,8 +222,7 @@ void loop() {
     } else {
       Serial.println("Falha ao publicar os dados na AWS.");
     }
+  }
 
-  }  
   delay(500); 
 }
-
